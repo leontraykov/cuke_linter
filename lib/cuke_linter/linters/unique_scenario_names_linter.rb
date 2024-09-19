@@ -7,7 +7,7 @@ module CukeLinter
       @scenario_names = {}
     end
 
-    def lint(model)
+    def rule(model)
       return nil unless valid_model?(model)
 
       feature_file = model.get_ancestor(:feature_file)
@@ -28,12 +28,12 @@ module CukeLinter
       errors = []
 
       model.scenarios.each do |scenario|
-        result = lint(scenario)
+        result = rule(scenario)
         errors << result if result.is_a?(Hash)
       end
 
       model.outlines.each do |outline|
-        result = lint(outline)
+        result = rule(outline)
         errors << result if result.is_a?(Hash)
       end
 
@@ -43,13 +43,11 @@ module CukeLinter
     def check_scenario(model, file_path)
       scenario_name = model.name
       check_duplicate(scenario_name, file_path)
-      return unless duplicate_name?(scenario_name, file_path)
+      return nil unless duplicate_name?(scenario_name, file_path)
 
-      {
-        linter:   'UniqueScenarioNamesLinter',
-        problem:  'Scenario names are not unique',
-        location: "#{file_path}:#{model.source_line}"
-      }
+      @message = 'Scenario names are not unique'
+      problem = build_problem(model)
+      problem.merge(linter: name)
     end
 
     def check_scenario_outline(model, file_path)
@@ -70,17 +68,11 @@ module CukeLinter
 
       duplicate_found = scenario_names.any? { |name| duplicate_name?(name, file_path) }
 
-      return outline_warning_message(file_path, model.source_line) if duplicate_found
-
-      nil
-    end
-
-    def outline_warning_message(file_path, source_line)
-      {
-        linter:   'UniqueScenarioNamesLinter',
-        problem:  'Template creates scenario names that are not unique',
-        location: "#{file_path}:#{source_line}"
-      }
+      if duplicate_found
+        @message = 'Template creates scenario names that are not unique'
+        problem = build_problem(model)
+        problem.merge(linter: name)
+      end
     end
 
     def interpolate_name(base_name, header_row, data_row)
@@ -107,6 +99,5 @@ module CukeLinter
     def valid_model?(model)
       model.is_a?(CukeModeler::Scenario) || model.is_a?(CukeModeler::Outline) || model.is_a?(CukeModeler::Rule)
     end
-
   end
 end

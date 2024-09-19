@@ -70,8 +70,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to match_array([
-                                         { linter:   'UniqueScenarioNamesLinter',
-                                           problem:  'Scenario names are not unique',
+                                         { problem:  'Scenario names are not unique',
                                            location: 'path_to_file:7' }
                                       ])
       end
@@ -99,7 +98,6 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            linter:   'UniqueScenarioNamesLinter',
             problem:  'Template creates scenario names that are not unique',
             location: 'path_to_file:4'
           }
@@ -132,7 +130,6 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            linter:   'UniqueScenarioNamesLinter',
             problem:  'Template creates scenario names that are not unique',
             location: 'path_to_file:7'
           }
@@ -169,7 +166,6 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            linter:   'UniqueScenarioNamesLinter',
             problem:  'Template creates scenario names that are not unique',
             location: 'path_to_file:11'
           }
@@ -200,7 +196,6 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            linter:   'UniqueScenarioNamesLinter',
             problem:  'Template creates scenario names that are not unique',
             location: 'path_to_file:4'
           }
@@ -229,9 +224,8 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.rules.first.tests.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to match_array([
-                                        { linter:   'UniqueScenarioNamesLinter',
-                                          problem:  'Scenario names are not unique',
-                                          location: 'path_to_file:8' }
+                                         { problem:  'Scenario names are not unique',
+                                           location: 'path_to_file:8' }
                                       ])
       end
     end
@@ -258,9 +252,8 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.rules.flat_map { |rule| rule.tests.map { |scenario| linter.lint(scenario) } }.compact
         expect(results).to match_array([
-                                        { linter:   'UniqueScenarioNamesLinter',
-                                          problem:  'Scenario names are not unique',
-                                          location: 'path_to_file:9' }
+                                         { problem:  'Scenario names are not unique',
+                                           location: 'path_to_file:9' }
                                       ])
       end
     end
