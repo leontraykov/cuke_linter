@@ -58,7 +58,7 @@ module CukeLinter
 
       model.examples.each do |example|
         header_row = example.rows.first
-        example.rows[1..-1].each do |data_row|
+        example.rows[1..].each do |data_row|
           scenario_name = interpolate_name(base_name, header_row, data_row)
           scenario_names << scenario_name
         end
