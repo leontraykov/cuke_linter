@@ -79,3 +79,40 @@ Feature: Unique scenario names
     Then the following problems are reported:
       | linter                     | problem                       | location        |
       | UniqueScenarioNamesLinter  | Scenario names are not unique | path_to_file:8  |
+
+  Scenario: Linting (Duplicates from Scenario Outline without placeholders)
+    Given the following feature:
+      """
+      Feature: Sample Feature with Scenario Outline without placeholders
+
+        Scenario Outline: Duplicate Scenario Name
+
+        Examples:
+          | input          |
+          | Something      |
+          | Something else  |
+      """
+    And a linter for unique scenario names
+    When the model is linted
+    Then the following problems are reported:
+      | linter                    | problem                                             | location        |
+      | UniqueScenarioNamesLinter | Template creates scenario names that are not unique | path_to_file:3  |
+
+  Scenario: Linting (No Scenario Name with Different Examples)
+    Given the following feature:
+      """
+      Feature: Sample Feature with Scenario Outline without a Name
+
+        Scenario Outline:
+          Given I have <input>
+
+        Examples:
+          | input     |
+          | something |
+          | anything  |
+      """
+    And a linter for unique scenario names
+    When the model is linted
+    Then the following problems are reported:
+      | linter                     | problem                                             | location        |
+      | UniqueScenarioNamesLinter  | Template creates scenario names that are not unique | path_to_file:3  |
