@@ -25,19 +25,13 @@ module CukeLinter
     private
 
     def check_rule(model)
-      errors = []
-
       model.scenarios.each do |scenario|
-        result = rule(scenario)
-        errors << result if result.is_a?(Hash)
+        @message = 'Scenario names are not unique within a Rule' if rule(scenario)
       end
 
       model.outlines.each do |outline|
-        result = rule(outline)
-        errors << result if result.is_a?(Hash)
+        @message = 'Scenario names created by template are not unique within a Rule' if rule(outline)
       end
-
-      errors.empty? ? nil : errors.first
     end
 
     def check_scenario(model, file_path)
@@ -68,11 +62,11 @@ module CukeLinter
 
       duplicate_found = scenario_names.any? { |name| duplicate_name?(name, file_path) }
 
-      if duplicate_found
-        @message = 'Template creates scenario names that are not unique'
-        problem = build_problem(model)
-        problem.merge(linter: name)
-      end
+      return unless duplicate_found
+
+      @message = 'Scenario names created by Scenario Outline are not unique'
+      problem = build_problem(model)
+      problem.merge(linter: name)
     end
 
     def interpolate_name(base_name, header_row, data_row)

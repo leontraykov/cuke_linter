@@ -58,8 +58,8 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                                             | location        |
-      | UniqueScenarioNamesLinter  | Template creates scenario names that are not unique | path_to_file:3  |
+      | linter                     | problem                                                   | location        |
+      | UniqueScenarioNamesLinter  | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
 
   Scenario: Linting (Duplicates within Rule)
     Given the following feature:
@@ -95,8 +95,8 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                    | problem                                             | location        |
-      | UniqueScenarioNamesLinter | Template creates scenario names that are not unique | path_to_file:3  |
+      | linter                    | problem                                                   | location        |
+      | UniqueScenarioNamesLinter | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
 
   Scenario: Linting (No Scenario Name with Different Examples)
     Given the following feature:
@@ -114,5 +114,5 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                                             | location        |
-      | UniqueScenarioNamesLinter  | Template creates scenario names that are not unique | path_to_file:3  |
+      | linter                     | problem                                                   | location        |
+      | UniqueScenarioNamesLinter  | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
