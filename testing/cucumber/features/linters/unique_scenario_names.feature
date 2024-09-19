@@ -1,7 +1,7 @@
 Feature: Unique scenario names
 
   As a reader of documentation
-  I want each scenario to have a unique name, even though they were created with a Scenario Outline or Rule.
+  I want each scenario to have a unique name within the same feature file, even if they were created using a Scenario Outline or Rule.
   So that each scenario describes a specific aspect of the application's functionality.
 
   Scenario: Linting (No Duplicates within Feature)
