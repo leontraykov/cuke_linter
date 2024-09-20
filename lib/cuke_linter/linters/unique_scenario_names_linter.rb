@@ -11,40 +11,51 @@ module CukeLinter
       return nil unless valid_model?(model)
 
       feature_file = model.get_ancestor(:feature_file)
+      return nil if feature_file.nil?
+      
       file_path = feature_file.path
 
-      if model.is_a?(CukeModeler::Rule)
-        check_rule(model)
-      elsif model.is_a?(CukeModeler::Outline)
+      case model
+      when CukeModeler::Rule
+        check_rule(model, file_path)
+      when CukeModeler::Outline
         check_scenario_outline(model, file_path)
-      else
+      when CukeModeler::Scenario
         check_scenario(model, file_path)
+      else
+        nil
       end
     end
 
     private
 
-    def check_rule(model)
+    def check_rule(model, file_path)
+      problems = []
+      rule_key = "#{file_path}:#{model.name}"
+
       model.scenarios.each do |scenario|
-        @message = 'Scenario names are not unique within a Rule' if rule(scenario)
+        problem = check_scenario(scenario, rule_key)
+        problems << problem if problem
       end
 
       model.outlines.each do |outline|
-        @message = 'Scenario names created by template are not unique within a Rule' if rule(outline)
+        problem = check_scenario_outline(outline, rule_key)
+        problems << problem if problem
       end
+
+      problems.first
     end
 
-    def check_scenario(model, file_path)
+    def check_scenario(model, scope_key)
       scenario_name = model.name
-      check_duplicate(scenario_name, file_path)
-      return nil unless duplicate_name?(scenario_name, file_path)
-
+      check_duplicate(scenario_name, scope_key)
+      return nil unless duplicate_name?(scenario_name, scope_key)
+      
       @message = 'Scenario names are not unique'
-      problem = build_problem(model)
-      problem.merge(linter: name)
+      build_problem(model)
     end
 
-    def check_scenario_outline(model, file_path)
+    def check_scenario_outline(model, scope_key)
       base_name = model.name
       scenario_names = []
 
@@ -57,16 +68,14 @@ module CukeLinter
       end
 
       scenario_names.each do |scenario_name|
-        check_duplicate(scenario_name, file_path)
+        check_duplicate(scenario_name, scope_key)
       end
 
-      duplicate_found = scenario_names.any? { |name| duplicate_name?(name, file_path) }
-
-      return unless duplicate_found
+      duplicates = scenario_names.select { |name| duplicate_name?(name, scope_key) }.uniq
+      return nil if duplicates.empty?
 
       @message = 'Scenario names created by Scenario Outline are not unique'
-      problem = build_problem(model)
-      problem.merge(linter: name)
+      build_problem(model)
     end
 
     def interpolate_name(base_name, header_row, data_row)
@@ -77,13 +86,13 @@ module CukeLinter
       interpolated_name
     end
 
-    def check_duplicate(scenario_name, file_path)
-      @scenario_names[file_path] ||= []
-      @scenario_names[file_path] << scenario_name
+    def check_duplicate(scenario_name, scope_key)
+      @scenario_names[scope_key] ||= []
+      @scenario_names[scope_key] << scenario_name
     end
 
-    def duplicate_name?(scenario_name, file_path)
-      @scenario_names[file_path].count(scenario_name) > 1
+    def duplicate_name?(scenario_name, scope_key)
+      @scenario_names[scope_key].count(scenario_name) > 1
     end
 
     def after_linting(_model)
@@ -91,7 +100,18 @@ module CukeLinter
     end
 
     def valid_model?(model)
-      model.is_a?(CukeModeler::Scenario) || model.is_a?(CukeModeler::Outline) || model.is_a?(CukeModeler::Rule)
+      model.is_a?(CukeModeler::Scenario) || 
+      model.is_a?(CukeModeler::Outline) || 
+      model.is_a?(CukeModeler::Rule)
+    end
+
+    def build_problem(model)
+      problem_message = respond_to?(:message) ? message : @message
+      if model.is_a?(CukeModeler::FeatureFile)
+        { problem: problem_message, location: model.path }
+      else
+        { problem: problem_message, location: "#{model.get_ancestor(:feature_file).path}:#{model.source_line}" }
+      end
     end
   end
 end

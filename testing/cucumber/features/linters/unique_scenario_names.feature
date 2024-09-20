@@ -4,7 +4,7 @@ Feature: Unique scenario names
   I want each scenario to have a unique name within the same feature file, even if they were created using a Scenario Outline or Rule.
   So that each scenario describes a specific aspect of the application's functionality.
 
-  Scenario: Linting (No Duplicates within Feature)
+  Scenario: Linting (No Duplicates within Feature including Rules)
     Given the following feature:
       """
       Feature: Sample Feature
@@ -16,11 +16,17 @@ Feature: Unique scenario names
           Given something else
 
         Scenario Outline: Unique Scenario Outline Name With <input>
-
         Examples:
           | input          |
           | something      |
           | something else |
+
+        Rule: Example Rule
+          Scenario: Unique Scenario Name within Rule 1
+            Given a rule specific condition
+
+          Scenario: Unique Scenario Name within Rule 2
+            Given another rule specific condition
       """
     And a linter for unique scenario names
     When the model is linted
