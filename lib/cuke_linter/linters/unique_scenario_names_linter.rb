@@ -104,14 +104,5 @@ module CukeLinter
       model.is_a?(CukeModeler::Outline) || 
       model.is_a?(CukeModeler::Rule)
     end
-
-    def build_problem(model)
-      problem_message = respond_to?(:message) ? message : @message
-      if model.is_a?(CukeModeler::FeatureFile)
-        { problem: problem_message, location: model.path }
-      else
-        { problem: problem_message, location: "#{model.get_ancestor(:feature_file).path}:#{model.source_line}" }
-      end
-    end
   end
 end
