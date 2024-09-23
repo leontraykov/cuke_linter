@@ -27,6 +27,10 @@ module CukeLinter
       end
     end
 
+    def message
+      @specified_message || 'Scenario names are not unique'
+    end
+
     private
 
     def check_rule(model, file_path)
@@ -40,18 +44,22 @@ module CukeLinter
       problems.first
     end
 
+    def create_duplicate_message(name, scope_key, is_outline = false)
+      original_line = @scenario_names[scope_key][name].first
+      duplicate_lines = @scenario_names[scope_key][name][1..].join(', ')
+      prefix = is_outline ? "Scenario name created by Scenario Outline" : "Scenario name"
+      "#{prefix} '#{name}' is not unique. \n" \
+      "    Original name is on line: #{original_line} \n" \
+      "    Duplicate is on: #{duplicate_lines}"
+    end
+    
     def check_scenario(model, scope_key)
       scenario_name = model.name
       record_scenario(scenario_name, scope_key, model.source_line)
       return nil unless duplicate_name?(scenario_name, scope_key)
-      
-      original_line = @scenario_names[scope_key][scenario_name].first
-      duplicate_lines = @scenario_names[scope_key][scenario_name][1..].join(', ')
-      @message = "Scenario name '#{scenario_name}' is not unique. \n"\
-                 "    Original name is on line: #{original_line} \n"\
-                 "    Duplicate is on: #{duplicate_lines}"
+      @specified_message = create_duplicate_message(scenario_name, scope_key)
     end
-
+    
     def check_scenario_outline(model, scope_key)
       base_name = model.name
       scenario_names = model.examples.flat_map do |example|
@@ -65,11 +73,7 @@ module CukeLinter
       end
       duplicates = scenario_names.select { |name| duplicate_name?(name, scope_key) }.uniq
       return nil if duplicates.empty?
-      original_line = @scenario_names[scope_key][duplicates.first].first
-      duplicate_lines = @scenario_names[scope_key][duplicates.first][1..].join(', ')
-      @message = "Scenario name created by Scenario Outline '#{duplicates.first}' is not unique. \n"\
-                 "    Original name is on line: #{original_line} \n"\
-                 "    Duplicate is on: #{duplicate_lines}"
+      @specified_message = create_duplicate_message(duplicates.first, scope_key, true)
     end
 
     def interpolate_name(base_name, header_row, data_row)
