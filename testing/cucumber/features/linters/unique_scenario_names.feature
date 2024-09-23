@@ -27,6 +27,17 @@ Feature: Unique scenario names
 
           Scenario: Unique Scenario Name within Rule 2
             Given another rule specific condition
+
+          Scenario: Unique Scenario Name 1
+            Given something
+
+        Rule: Example Rule 1
+          Scenario: Duplicate Scenario Name
+            Given something
+
+        Rule: Example Rule 2
+          Scenario: Duplicate Scenario Name
+            Given something
       """
     And a linter for unique scenario names
     When the model is linted
@@ -48,26 +59,7 @@ Feature: Unique scenario names
     When the model is linted
     Then the following problems are reported:
       | linter                     | problem                                                                                                           | location        |
-      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 7 | path_to_file:7  |
-
-  Scenario: Linting (Bad: Duplicates of scenario names from different Rules)
-    Given the following feature:
-      """
-      Feature: Sample Feature
-
-        Rule: Example Rule 1
-          Scenario: Duplicate Scenario Name
-            Given something
-
-        Rule: Example Rule 2
-          Scenario: Duplicate Scenario Name
-            Given something
-      """
-    And a linter for unique scenario names
-    When the model is linted
-    Then the following problems are reported:
-      | linter                     | problem                                                                                                           | location        |
-      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 8 | path_to_file:7  |
+      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 7 | path_to_file:3  |
 
   Scenario: Linting (Bad: Duplicates within Feature)
     Given the following feature:
@@ -121,7 +113,7 @@ Feature: Unique scenario names
     When the model is linted
     Then the following problems are reported:
       | linter                     | problem                                                                                                           | location        |
-      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 5 \n    Duplicate is on: 8 | path_to_file:8  |
+      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 5 \n    Duplicate is on: 8 | path_to_file:3  |
 
   Scenario: Linting (Bad: Duplicates from Scenario Outline without placeholders)
     Given the following feature:

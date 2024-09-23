@@ -18,10 +18,16 @@ module CukeLinter
       case model
       when CukeModeler::Rule
         check_rule(model, file_path)
-      when CukeModeler::Outline
-        check_scenario_outline(model, file_path)
-      when CukeModeler::Scenario
-        check_scenario(model, file_path)
+      when CukeModeler::Scenario, CukeModeler::Outline
+        return nil if model.get_ancestor(:rule)
+
+        scope_key = "#{file_path}:feature"
+
+        if model.is_a?(CukeModeler::Outline)
+          check_scenario_outline(model, scope_key)
+        else
+          check_scenario(model, scope_key)
+        end
       else
         nil
       end
@@ -34,14 +40,12 @@ module CukeLinter
     private
 
     def check_rule(model, file_path)
-      problems = []
-      rule_key = "#{file_path}:#{name}"
-
-      problems.concat(model.scenarios.filter_map { |scenario| check_scenario(scenario, rule_key) })
-
-      problems.concat(model.outlines.filter_map { |outline| check_scenario_outline(outline, rule_key) })
+      scope_key = "#{file_path}:rule:#{model.name}"
+    
+      problems = model.scenarios.map { |scenario| check_scenario(scenario, scope_key) }
+      problems += model.outlines.map { |outline| check_scenario_outline(outline, scope_key) }
       
-      problems.first
+      problems.compact.first
     end
 
     def create_duplicate_message(name, scope_key, is_outline = false)
@@ -52,14 +56,14 @@ module CukeLinter
       "    Original name is on line: #{original_line} \n" \
       "    Duplicate is on: #{duplicate_lines}"
     end
-    
+
     def check_scenario(model, scope_key)
       scenario_name = model.name
       record_scenario(scenario_name, scope_key, model.source_line)
       return nil unless duplicate_name?(scenario_name, scope_key)
       @specified_message = create_duplicate_message(scenario_name, scope_key)
     end
-    
+
     def check_scenario_outline(model, scope_key)
       base_name = model.name
       scenario_names = model.examples.flat_map do |example|
