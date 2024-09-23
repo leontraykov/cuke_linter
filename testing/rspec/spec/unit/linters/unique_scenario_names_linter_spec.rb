@@ -70,7 +70,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to match_array([
-                                         { problem:  'Scenario names are not unique',
+                                         { problem:  "Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 7",
                                            location: 'path_to_file:7' }
                                       ])
       end
@@ -98,7 +98,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            problem:  'Scenario names created by Scenario Outline are not unique',
+            problem:  "Scenario name created by Scenario Outline 'Repeated Scenario Name Doing Something' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 4",
             location: 'path_to_file:4'
           }
         )
@@ -130,7 +130,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            problem:  'Scenario names created by Scenario Outline are not unique',
+            problem:  "Scenario name created by Scenario Outline 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 7",
             location: 'path_to_file:7'
           }
         )
@@ -166,7 +166,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            problem:  'Scenario names created by Scenario Outline are not unique',
+            problem:  "Scenario name created by Scenario Outline 'Conflicting Scenario Name Conflict' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 11",
             location: 'path_to_file:11'
           }
         )
@@ -196,7 +196,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
         results = model.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to include(
           {
-            problem:  'Scenario names created by Scenario Outline are not unique',
+            problem:  "Scenario name created by Scenario Outline 'Scenario Name' is not unique. \n    Original name is on line: 4 \n    Duplicate is on: 4",
             location: 'path_to_file:4'
           }
         )
@@ -224,7 +224,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.rules.first.tests.map { |scenario| linter.lint(scenario) }.compact
         expect(results).to match_array([
-                                         { problem:  'Scenario names are not unique',
+                                         { problem:  "Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 5 \n    Duplicate is on: 8",
                                            location: 'path_to_file:8' }
                                       ])
       end
@@ -252,7 +252,7 @@ RSpec.describe CukeLinter::UniqueScenarioNamesLinter do
       it 'returns a detected problem and its location' do
         results = model.rules.flat_map { |rule| rule.tests.map { |scenario| linter.lint(scenario) } }.compact
         expect(results).to match_array([
-                                         { problem:  'Scenario names are not unique',
+                                         { problem:  "Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 5 \n    Duplicate is on: 9",
                                            location: 'path_to_file:9' }
                                       ])
       end

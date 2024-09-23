@@ -2,9 +2,9 @@ Feature: Unique scenario names
 
   As a reader of documentation
   I want each scenario to have a unique name within the same feature file, even if they were created using a Scenario Outline or Rule.
-  So that each scenario describes a specific aspect of the application's functionality.
+  So that each scenario clearly describes a specific aspect of the application's functionality.
 
-  Scenario: Linting (No Duplicates within Feature including Rules)
+  Scenario: Linting (Good: No Duplicates within Feature including Rules)
     Given the following feature:
       """
       Feature: Sample Feature
@@ -32,7 +32,7 @@ Feature: Unique scenario names
     When the model is linted
     Then no error is reported
 
-  Scenario: Linting (Duplicates within Feature)
+  Scenario: Linting (Bad: Duplicates within Feature)
     Given the following feature:
       """
       Feature: Sample Feature
@@ -46,10 +46,10 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                       | location        |
-      | UniqueScenarioNamesLinter  | Scenario names are not unique | path_to_file:6  |
+      | linter                     | problem                                                                                                           | location        |
+      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 3 \n    Duplicate is on: 6 | path_to_file:6  |
 
-  Scenario: Linting (Duplicates from Scenario Outline)
+  Scenario: Linting (Bad: Duplicates from Scenario Outline)
     Given the following feature:
       """
       Feature: Sample Feature with Scenario Outline
@@ -64,10 +64,10 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                                                   | location        |
-      | UniqueScenarioNamesLinter  | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
+      | linter                     | problem                                                                                                                                                      | location        |
+      | UniqueScenarioNamesLinter  | Scenario name created by Scenario Outline 'Duplicate Scenario Name With something' is not unique. \n    Original name is on line: 3 \n    Duplicate is on: 3 | path_to_file:3  |
 
-  Scenario: Linting (Duplicates within Rule)
+  Scenario: Linting (Bad: Duplicates within Rule)
     Given the following feature:
       """
       Feature: Sample Feature with Rules
@@ -83,10 +83,10 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                       | location        |
-      | UniqueScenarioNamesLinter  | Scenario names are not unique | path_to_file:8  |
+      | linter                     | problem                                                                                                           | location        |
+      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 5 \n    Duplicate is on: 8 | path_to_file:8  |
 
-  Scenario: Linting (Duplicates from Scenario Outline without placeholders)
+  Scenario: Linting (Bad: Duplicates from Scenario Outline without placeholders)
     Given the following feature:
       """
       Feature: Sample Feature with Scenario Outline without placeholders
@@ -101,10 +101,10 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                    | problem                                                   | location        |
-      | UniqueScenarioNamesLinter | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
+      | linter                    | problem                                                                                                                                       | location        |
+      | UniqueScenarioNamesLinter | Scenario name created by Scenario Outline 'Duplicate Scenario Name' is not unique. \n    Original name is on line: 3 \n    Duplicate is on: 3 | path_to_file:3  |
 
-  Scenario: Linting (No Scenario Name with Different Examples)
+  Scenario: Linting (Bad: No Scenario Name with Different Examples)
     Given the following feature:
       """
       Feature: Sample Feature with Scenario Outline without a Name
@@ -120,5 +120,5 @@ Feature: Unique scenario names
     And a linter for unique scenario names
     When the model is linted
     Then the following problems are reported:
-      | linter                     | problem                                                   | location        |
-      | UniqueScenarioNamesLinter  | Scenario names created by Scenario Outline are not unique | path_to_file:3  |
+      | linter                     | problem                                                                                                                | location        |
+      | UniqueScenarioNamesLinter  | Scenario name created by Scenario Outline '' is not unique. \n    Original name is on line: 3 \n    Duplicate is on: 3 | path_to_file:3  |
