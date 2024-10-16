@@ -1,7 +1,6 @@
 module CukeLinter
   # A linter that detects non-unique scenario names
   class UniqueScenarioNamesLinter < Linter
-
     def initialize
       super
       @scenario_names = {}
@@ -11,7 +10,7 @@ module CukeLinter
       return nil unless valid_model?(model)
 
       feature_file = model.get_ancestor(:feature_file)
-      return nil if feature_file.nil?
+      return nil unless feature_file
 
       file_path = feature_file.path
 
@@ -19,15 +18,11 @@ module CukeLinter
       when CukeModeler::Rule
         check_rule(model, file_path)
       when CukeModeler::Scenario, CukeModeler::Outline
+        # Skip scenarios and outlines inside rules
         return nil if model.get_ancestor(:rule)
 
         scope_key = "#{file_path}:feature"
-
-        if model.is_a?(CukeModeler::Outline)
-          check_scenario_outline(model, scope_key)
-        else
-          check_scenario(model, scope_key)
-        end
+        check_scenario_or_outline(model, scope_key)
       else
         nil
       end
@@ -39,22 +34,30 @@ module CukeLinter
 
     private
 
-    def check_rule(model, file_path)
-      scope_key = "#{file_path}:rule:#{model.name}"
-    
-      problems = model.scenarios.map { |scenario| check_scenario(scenario, scope_key) }
-      problems += model.outlines.map { |outline| check_scenario_outline(outline, scope_key) }
-      
-      problems.compact.first
-    end
-
     def create_duplicate_message(name, scope_key, is_outline = false)
       original_line = @scenario_names[scope_key][name].first
       duplicate_lines = @scenario_names[scope_key][name][1..].join(', ')
       prefix = is_outline ? "Scenario name created by Scenario Outline" : "Scenario name"
-      "#{prefix} '#{name}' is not unique. \n" \
-      "    Original name is on line: #{original_line} \n" \
+      "#{prefix} '#{name}' is not unique.\n" \
+      "    Original name is on line: #{original_line}\n" \
       "    Duplicate is on: #{duplicate_lines}"
+    end
+
+    def check_rule(model, file_path)
+      rule_scope_key = "#{file_path}:rule:#{model.name}"
+
+      problems = model.scenarios.map { |scenario| check_scenario(scenario, rule_scope_key) }
+      problems += model.outlines.map { |outline| check_scenario_or_outline(outline, rule_scope_key) }
+
+      problems.compact.first
+    end
+
+    def check_scenario_or_outline(model, scope_key)
+      if model.is_a?(CukeModeler::Outline)
+        check_scenario_outline(model, scope_key)
+      else
+        check_scenario(model, scope_key)
+      end
     end
 
     def check_scenario(model, scope_key)
@@ -62,6 +65,7 @@ module CukeLinter
       record_scenario(scenario_name, scope_key, model.source_line)
       return nil unless duplicate_name?(scenario_name, scope_key)
       @specified_message = create_duplicate_message(scenario_name, scope_key)
+      message
     end
 
     def check_scenario_outline(model, scope_key)
@@ -72,12 +76,15 @@ module CukeLinter
           interpolate_name(base_name, header_row, data_row)
         end
       end
+
       scenario_names.each do |scenario_name|
         record_scenario(scenario_name, scope_key, model.source_line)
       end
+
       duplicates = scenario_names.select { |name| duplicate_name?(name, scope_key) }.uniq
-      return nil if duplicates.empty?
+      return nil unless duplicates.any?
       @specified_message = create_duplicate_message(duplicates.first, scope_key, true)
+      message
     end
 
     def interpolate_name(base_name, header_row, data_row)
@@ -89,8 +96,7 @@ module CukeLinter
     end
 
     def record_scenario(scenario_name, scope_key, source_line)
-      @scenario_names[scope_key] ||= {}
-      @scenario_names[scope_key][scenario_name] ||= []
+      @scenario_names[scope_key] ||= Hash.new { |h, k| h[k] = [] }
       @scenario_names[scope_key][scenario_name] << source_line
     end
 
