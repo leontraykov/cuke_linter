@@ -1,6 +1,8 @@
 module CukeLinter
+
   # A linter that detects non-unique scenario names
   class UniqueScenarioNamesLinter < Linter
+
     def initialize
       super
       @scenario_names = {}
@@ -23,8 +25,6 @@ module CukeLinter
 
         scope_key = "#{file_path}:feature"
         check_scenario_or_outline(model, scope_key)
-      else
-        nil
       end
     end
 
@@ -37,10 +37,10 @@ module CukeLinter
     def create_duplicate_message(name, scope_key, is_outline = false)
       original_line = @scenario_names[scope_key][name].first
       duplicate_lines = @scenario_names[scope_key][name][1..].join(', ')
-      prefix = is_outline ? "Scenario name created by Scenario Outline" : "Scenario name"
-      "#{prefix} '#{name}' is not unique.\n" \
-      "    Original name is on line: #{original_line}\n" \
-      "    Duplicate is on: #{duplicate_lines}"
+      prefix = is_outline ? 'Scenario name created by Scenario Outline' : 'Scenario name'
+      "#{prefix} '#{name}' is not unique.\n    " \
+        "Original name is on line: #{original_line}\n    " \
+        "Duplicate is on: #{duplicate_lines}"
     end
 
     def check_rule(model, file_path)
@@ -64,18 +64,14 @@ module CukeLinter
       scenario_name = model.name
       record_scenario(scenario_name, scope_key, model.source_line)
       return nil unless duplicate_name?(scenario_name, scope_key)
+
       @specified_message = create_duplicate_message(scenario_name, scope_key)
       message
     end
 
     def check_scenario_outline(model, scope_key)
       base_name = model.name
-      scenario_names = model.examples.flat_map do |example|
-        header_row = example.rows.first
-        example.rows[1..].map do |data_row|
-          interpolate_name(base_name, header_row, data_row)
-        end
-      end
+      scenario_names = generate_scenario_names(model, base_name)
 
       scenario_names.each do |scenario_name|
         record_scenario(scenario_name, scope_key, model.source_line)
@@ -83,8 +79,18 @@ module CukeLinter
 
       duplicates = scenario_names.select { |name| duplicate_name?(name, scope_key) }.uniq
       return nil unless duplicates.any?
+
       @specified_message = create_duplicate_message(duplicates.first, scope_key, true)
       message
+    end
+
+    def generate_scenario_names(model, base_name)
+      model.examples.flat_map do |example|
+        header_row = example.rows.first
+        example.rows[1..].map do |data_row|
+          interpolate_name(base_name, header_row, data_row)
+        end
+      end
     end
 
     def interpolate_name(base_name, header_row, data_row)
@@ -109,5 +115,6 @@ module CukeLinter
         model.is_a?(CukeModeler::Outline) ||
         model.is_a?(CukeModeler::Rule)
     end
+
   end
 end
