@@ -26,8 +26,7 @@ module CukeLinter # rubocop:disable Style/Documentation
                         'TestWithSetupStepAfterActionStepLinter'       => TestWithSetupStepAfterActionStepLinter.new,
                         'TestWithSetupStepAfterVerificationStepLinter' => TestWithSetupStepAfterVerificationStepLinter.new,
                         'TestWithSetupStepAsFinalStepLinter'           => TestWithSetupStepAsFinalStepLinter.new,
-                        'TestWithTooManyStepsLinter'                   => TestWithTooManyStepsLinter.new,
-                        'UniqueScenarioNamesLinter'                    => UniqueScenarioNamesLinter.new }
+                        'TestWithTooManyStepsLinter'                   => TestWithTooManyStepsLinter.new }
   # rubocop:enable Layout/LineLength
 
 end

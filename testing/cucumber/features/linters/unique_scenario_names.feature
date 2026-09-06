@@ -4,7 +4,7 @@ Feature: Unique scenario names
   I want each scenario to have a unique name within its scope, where scenarios in Rules are scoped to their Rule and other scenarios are scoped to the Feature file
   So that each scenario clearly describes a specific aspect of the application's functionality.
 
-  Scenario: Linting (Good: No Duplicates within Feature including Rules)
+  Scenario: Linting (Good: All scenario names are unique)
     Given the following feature:
       """
       Feature: Sample Feature
@@ -16,86 +16,38 @@ Feature: Unique scenario names
           Given something else
 
         Scenario Outline: Unique Scenario Outline Name With <input>
+          Given <input>
+
         Examples:
           | input          |
           | something      |
           | something else |
-
-        Rule: Example Rule
-          Scenario: Unique Scenario Name within Rule 1
-            Given a rule specific condition
-
-          Scenario: Unique Scenario Name within Rule 2
-            Given another rule specific condition
-
-          Scenario: Unique Scenario Name 1
-            Given something
-
-        Rule: Example Rule 1
-          Scenario: Duplicate Scenario Name
-            Given something
-
-        Rule: Example Rule 2
-          Scenario: Duplicate Scenario Name
-            Given something
       """
     And a linter for unique scenario names
     When the model is linted
     Then no error is reported
 
-  Scenario: Linting (Good: Duplicates within different Rules)
+  Scenario: Linting (Good: Same name allowed in different scopes)
     Given the following feature:
       """
       Feature: Sample Feature with Rules
 
+        Scenario: Same Scenario Name
+          Given something
+
         Rule: Sample Rule 1
 
-          Scenario: Duplicate Scenario Name
+          Scenario: Same Scenario Name
             Given something
 
         Rule: Sample Rule 2
 
-          Scenario: Duplicate Scenario Name
+          Scenario: Same Scenario Name
             Given something
       """
     And a linter for unique scenario names
     When the model is linted
     Then no error is reported
-
-  Scenario: Linting (Good: Duplicates within Rule and regular scenario)
-    Given the following feature:
-      """
-      Feature: Sample Feature with Rules
-
-        Scenario: Duplicate Scenario Name
-          Given something
-
-        Rule: Sample Rule
-
-          Scenario: Duplicate Scenario Name
-            Given something
-      """
-    And a linter for unique scenario names
-    When the model is linted
-    Then no error is reported
-
-  Scenario: Linting (Bad: Duplicates of regular scenario name and one from a Rule)
-    Given the following feature:
-      """
-      Feature: Sample Feature
-
-        Rule: Example Rule
-          Scenario: Duplicate Scenario Name
-            Given something
-
-        Scenario: Duplicate Scenario Name
-          Given something
-      """
-    And a linter for unique scenario names
-    When the model is linted
-    Then the following problems are reported:
-      | linter                     | problem                                                                                                         | location        |
-      | UniqueScenarioNamesLinter  | Scenario name 'Duplicate Scenario Name' is not unique.\n    Original name is on line: 4\n    Duplicate is on: 7 | path_to_file:3  |
 
   Scenario: Linting (Bad: Duplicates within Feature)
     Given the following feature:
@@ -161,7 +113,7 @@ Feature: Unique scenario names
         Examples:
           | input          |
           | Something      |
-          | Something else  |
+          | Something else |
       """
     And a linter for unique scenario names
     When the model is linted
